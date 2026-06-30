@@ -4,6 +4,8 @@ import cl.dgac.drones.dto.DroneRequestDTO;
 import cl.dgac.drones.dto.DroneResponseDTO;
 import cl.dgac.drones.service.DroneService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -42,7 +44,21 @@ public class DroneController {
         return ResponseEntity.ok(droneService.buscarPorId(id));
     }
 
-    @Operation(summary = "Registrar nuevo drone", description = "Ingresa una nueva aeronave no tripulada a la base de datos de la DGAC.")
+    @Operation(
+            summary = "Registrar nuevo drone", 
+            description = "Ingresa una nueva aeronave no tripulada a la base de datos de la DGAC.",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Datos para registrar un nuevo drone",
+                    required = true,
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    name = "Ejemplo de Registro",
+                                    value = "{\n  \"marca\": \"DJI\",\n  \"modelo\": \"Mavic 3 Enterprise\",\n  \"numeroSerie\": \"15283948572A\",\n  \"pesoGramos\": 915,\n  \"tipoUso\": \"COMERCIAL\",\n  \"pilotoId\": 101,\n  \"estado\": \"ACTIVO\"\n}"
+                            )
+                    )
+            )
+    )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Drone registrado exitosamente"),
             @ApiResponse(responseCode = "400", description = "Datos de entrada inválidos (ej. número de serie duplicado)")
@@ -53,7 +69,21 @@ public class DroneController {
         return ResponseEntity.status(HttpStatus.CREATED).body(droneCreado);
     }
 
-    @Operation(summary = "Actualizar información del drone", description = "Modifica los datos o el estado operativo de un drone existente.")
+    @Operation(
+            summary = "Actualizar información del drone", 
+            description = "Modifica los datos o el estado operativo de un drone existente.",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Nuevos datos operativos del drone",
+                    required = true,
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    name = "Ejemplo de Actualización",
+                                    value = "{\n  \"marca\": \"DJI\",\n  \"modelo\": \"Mavic 3 Enterprise\",\n  \"numeroSerie\": \"15283948572A\",\n  \"pesoGramos\": 915,\n  \"tipoUso\": \"COMERCIAL\",\n  \"pilotoId\": 101,\n  \"estado\": \"MANTENIMIENTO\"\n}"
+                            )
+                    )
+            )
+    )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Drone actualizado exitosamente"),
             @ApiResponse(responseCode = "404", description = "Drone no encontrado"),

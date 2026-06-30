@@ -17,14 +17,16 @@ public class DroneService {
 
     private final DroneRepository droneRepository;
     private final DroneMapper droneMapper;
-    private final WebClient.Builder webClientBuilder;
+    
+    // Inyectamos el WebClient pre-configurado para balanceo de carga
+    private final WebClient webClientPilotos;
 
     public DroneService(DroneRepository droneRepository,
                         DroneMapper droneMapper,
-                        WebClient.Builder webClientBuilder) {
+                        WebClient webClientPilotos) {
         this.droneRepository = droneRepository;
         this.droneMapper = droneMapper;
-        this.webClientBuilder = webClientBuilder;
+        this.webClientPilotos = webClientPilotos;
     }
 
     public List<DroneResponseDTO> listarDrones() {
@@ -94,9 +96,10 @@ public class DroneService {
     }
 
     public String consultarMicroservicioPilotos() {
-        return webClientBuilder.build()
+        // Usamos la ruta relativa y el cliente inyectado; Eureka resuelve la IP y puerto
+        return webClientPilotos
                 .get()
-                .uri("http://localhost:8082/api/pilotos")
+                .uri("/api/pilotos")
                 .retrieve()
                 .bodyToMono(String.class)
                 .block();
