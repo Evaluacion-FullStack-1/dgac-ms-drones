@@ -6,8 +6,9 @@ import cl.dgac.drones.exception.ResourceNotFoundException;
 import cl.dgac.drones.mapper.DroneMapper;
 import cl.dgac.drones.model.Drone;
 import cl.dgac.drones.repository.DroneRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -18,15 +19,19 @@ public class DroneService {
     private final DroneRepository droneRepository;
     private final DroneMapper droneMapper;
     
-    // Inyectamos el WebClient pre-configurado para balanceo de carga
-    private final WebClient webClientPilotos;
+    // Inyectamos el RestTemplate pre-configurado para balanceo de carga
+    private final RestTemplate restTemplate;
+
+    // Traemos la URL base desde el application.yml (http://DGAC-MS-PILOTOS)
+    @Value("${pilotos.base-url}")
+    private String pilotosBaseUrl;
 
     public DroneService(DroneRepository droneRepository,
                         DroneMapper droneMapper,
-                        WebClient webClientPilotos) {
+                        RestTemplate restTemplate) {
         this.droneRepository = droneRepository;
         this.droneMapper = droneMapper;
-        this.webClientPilotos = webClientPilotos;
+        this.restTemplate = restTemplate;
     }
 
     public List<DroneResponseDTO> listarDrones() {
@@ -96,12 +101,8 @@ public class DroneService {
     }
 
     public String consultarMicroservicioPilotos() {
-        // Usamos la ruta relativa y el cliente inyectado; Eureka resuelve la IP y puerto
-        return webClientPilotos
-                .get()
-                .uri("/api/pilotos")
-                .retrieve()
-                .bodyToMono(String.class)
-                .block();
+        // Usamos RestTemplate combinando la URL base de Eureka con el endpoint
+        String url = pilotosBaseUrl + "/api/pilotos";
+        return restTemplate.getForObject(url, String.class);
     }
 }
